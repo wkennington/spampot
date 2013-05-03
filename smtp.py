@@ -18,3 +18,7 @@
 """
 
 class SMTP:
+    def __init__(self, addr='0.0.0.0', port=25, host='localhost'):
+        pass
+    def run():
+        pass

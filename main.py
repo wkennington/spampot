@@ -17,8 +17,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
+import smtp
+import configparser
 
 def run():
+    config = configparser.ConfigParser()
+    config.read('spampot.conf')
+    if not ('Global' in config.sections()):
+        print('Configuration file is missing the "Global" section')
+        exit(1)
+    server = smtp.SMTP()
+    exit(0)
 
 if  __name__ == '__main__':
-	run()
+    run()
