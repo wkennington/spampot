@@ -1,0 +1,5 @@
+# Milestone 0.1
+  Working SMTP Relay Server
+# Milestone 0.2
+  Ability to restrict message flow
+  Logging of all sent message
