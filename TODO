@@ -4,4 +4,4 @@
   Ability to restrict message flow
   Logging of all sent message
 # Eventually
-  Handle command line arguments for daemonizing / config / logging
+  Handle command line arguments for daemonizing / logging

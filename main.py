@@ -21,7 +21,7 @@ import smtp
 import configparser
 import argparse
 
-def serve(config):
+def serve(log, config):
     addr = config['Global'].get('addr', '0.0.0.0')
     port = config['Global'].get('port', 25)
     host = config['Global'].get('host', 'localhost')
@@ -29,11 +29,18 @@ def serve(config):
     server.run()
     exit(0)
 
+def daemonize(log_name, config):
+    if log_name == '-':
+        pass
+    pass
+
+def normal(log_name, config):
+    pass
+
 def run():
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description='Spawn the spampot server')
     parser.add_argument('--conf', dest='conf', metavar='c', type=str, default='spampot.conf', help='Configuration file to read')
-
     args = parser.parse_args()
 
     # Read the default configuration file
@@ -43,11 +50,13 @@ def run():
         print('Configuration file is missing the "Global" section')
         exit(1)
     log = config['Global'].get('log', 'syslog')
+
+    # Perform the requested service
     if config['Global'].get('daemon', True):
-        if log == '-':
-            pass
+        daemonize(log, config)
     else:
-        serve(config)
+        normal(log, config)
+
     exit(0)
 
 if  __name__ == '__main__':
