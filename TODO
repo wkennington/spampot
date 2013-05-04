@@ -1,9 +1,9 @@
-# Milestone 0.1
+# Milestone 1
   Working SMTP Relay Server
   Perform extra validation on email addresses in the SMTP module
   Perform validation of at least 1 TO and FROM before DATA can be used
-# Milestone 0.2
+# Milestone 2
   Ability to restrict message flow
   Logging of all sent message
-# Milestone 0.3
+# Milestone 3
   Add limits to state and inbound messages, pretty much limit all memory usage
