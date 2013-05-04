@@ -17,18 +17,20 @@
 
 """
 
-from collections import namedtuple
-
-Msg = namedtuple('Msg', ['to', 'sender', 'data'])
+class Msg:
+    def __init__(self, to, sender, data):
+        self.to = to
+        self.sender = sender
+        self.data = data
 
 class BaseHandler:
-    def handle(self, msg, msg_count):
+    def handle(self, msg):
         pass
 
 class FileHandler(BaseHandler):
-    def handle(self, msg, msg_count):
+    def handle(self, msg):
         pass
 
 class SendHandler(BaseHandler):
-    def handle(self, msg, msg_count):
+    def handle(self, msg):
         pass

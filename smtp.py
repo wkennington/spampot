@@ -46,7 +46,7 @@ class SMTPHandler(asynchat.async_chat):
         self.host = host
         self.reset()
 
-        self.log.debug('Connection from %s' % self.peeraddr)
+        self.log.debug('SMTP: Connection from %s' % self.peeraddr)
         self.pushs('220 %s ESMTP Sendmail 8.14.7\r\n' % self.host)
 
     def reset(self):
@@ -54,9 +54,9 @@ class SMTPHandler(asynchat.async_chat):
 
     def handle_close(self):
         if self.msg_count == 0:
-            self.log.info('Closed with no messages from %s' % self.peeraddr)
+            self.log.info('SMTP: Closed with no messages from %s' % self.peeraddr)
         else:
-            self.log.info('Processed %d messages from %s' % (self.msg_count, self.peername))
+            self.log.info('SMTP: Processed %d messages from %s' % (self.msg_count, self.peername))
         self.close()
 
     def collect_incoming_data(self, data):
@@ -80,44 +80,52 @@ class SMTPHandler(asynchat.async_chat):
         # Handle Possible Commands
         if cmd in [b'HELO', b'EHLO']:
             self.peername = args
-            self.log.debug('%s is named %s' % (self.peeraddr, self.peername))
+            self.log.debug('SMTP: %s is named %s' % (self.peeraddr, self.peername))
             self.pushs('250 Hello %s, please to meet you\r\n' % self.peername)
         elif cmd == b'MAIL':
             act = self.parseKeyword(args, 'FROM:')
             if act == None:
-                self.log.debug('%s sent invalid mail cmd: %s' % (self.peeraddr, args))
-                self.pushs('500 Invalid Params\r\n')
+                self.log.debug('SMTP: %s sent invalid mail cmd: %s' % (self.peeraddr, args))
+                self.pushs('501 Invalid Params\r\n')
             else:
-                self.log.debug('%s mail from %s' % (self.peeraddr, act))
+                self.log.debug('SMTP: %s mail from %s' % (self.peeraddr, act))
                 self.msg.sender = act
                 self.pushs('250 Ok\r\n')
         elif cmd == b'RCPT':
             act = self.parseKeyword(args, 'TO:')
             if act == None:
-                self.log.debug('%s invalid rcpt cmd: %s' % (self.peeraddr, args))
-                self.pushs('500 Invalid Params\r\n')
+                self.log.debug('SMTP: %s invalid rcpt cmd: %s' % (self.peeraddr, args))
+                self.pushs('501 Invalid Params\r\n')
             else:
-                self.log.debug('%s added rcpt %s' % (self.peeraddr, act))
+                self.log.debug('SMTP: %s added rcpt %s' % (self.peeraddr, act))
                 self.msg.to.append(act)
                 self.pushs('250 Ok\r\n')
         elif cmd == b'DATA':
             self.pushs('354 Enter mail, end with "." on a line by itself\r\n')
-            self.log.debug('%s now sending data' % self.peeraddr)
+            self.log.debug('SMTP: %s now sending data' % self.peeraddr)
             self.set_terminator('data')
         elif cmd == b'QUIT':
             self.pushs('221 %s closing connection\r\n' % self.host)
-            self.log.debug('%s quit' % self.peeraddr)
+            self.log.debug('SMTP: %s quit' % self.peeraddr)
             self.close_when_done()
         elif cmd == b'RSET':
             self.reset()
-            self.log.debug('%s reset state' % self.peeraddr)
+            self.log.debug('SMTP: %s reset state' % self.peeraddr)
             self.pushs('250 Reset state\r\n')
         else:
             self.pushs('500 Command unrecognized\r\n')
-            self.log.debug('%s sent invalid command: %s' % (self.peeraddr, cmd))
+            self.log.debug('SMTP: %s sent invalid command: %s' % (self.peeraddr, cmd))
 
     def data_found_terminator(self):
-        self.set_terminator('header') 
+        self.set_terminator('header')
+        self.pushs('250 Mail accepted\r\n')
+        self.msg.data = self.buff
+        self.buff = b''
+        for handler in self.handlers:
+            handler.handle(self.msg)
+        self.msg_count += 1
+        self.reset()
+        self.log.debug('SMTP: %s processed data' % self.peeraddr)
 
 class SMTP(asyncore.dispatcher):
     def __init__(self, log, addr='0.0.0.0', port=25, host='localhost'):
