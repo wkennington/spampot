@@ -19,16 +19,16 @@
 
 from collections import namedtuple
 
-Msg = namedtuple('Msg', ['to', 'cc', 'bcc', 'sender', 'sub', 'data'])
+Msg = namedtuple('Msg', ['to', 'cc', 'bcc', 'sender', 'data'])
 
 class BaseHandler:
-    def handle(msg):
+    def handle(self, msg, msg_count):
         pass
 
 class FileHandler(BaseHandler):
-    def handle(msg):
+    def handle(self, msg, msg_count):
         pass
 
 class SendHandler(BaseHandler):
-    def handle(msg):
+    def handle(self, msg, msg_count):
         pass
