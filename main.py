@@ -19,22 +19,40 @@
 """
 import smtp
 import os, sys
+import signal
 import configparser
 import argparse
 import logging, logging.handlers
 
+def death(pidfile):
+    if pidfile != None:
+        os.unlink(pidfile)
+    exit(0)
+
 def serve(log, config):
     log.debug('Opening Server')
+
+    # Setup operations based on the pidfile
     pidfile = config['Global'].get('pidfile', None)
     if pidfile != None:
-        file(pidfile, 'w').write(str(os.getpid()))
+        if os.path.isfile(pidfile):
+            log.error('Pidfile already exists! Exiting')
+            exit(1)
+        open(pidfile, 'w').write(str(os.getpid()))
         log.debug('Wrote pidfile %s' % pidfile)
+
+        # Hack to unlink the pidfile on exit
+        signal.signal(signal.SIGINT, (lambda signum, frame: death(pidfile)))
+
+    # Create a new SMTP Server
     addr = config['Global'].get('addr', '0.0.0.0')
     port = config['Global'].get('port', 25)
     host = config['Global'].get('host', 'localhost')
     server = smtp.SMTP(host=host, port=port, addr=addr)
+
+    # Run the server
     server.run()
-    exit(0)
+    death(pidfile)
 
 def daemonize(log, config):
     log.debug('Forking Daemon')
