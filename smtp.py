@@ -101,9 +101,13 @@ class SMTPHandler(asynchat.async_chat):
                 self.msg.to.append(act)
                 self.pushs('250 Ok\r\n')
         elif cmd == b'DATA':
-            self.pushs('354 Enter mail, end with "." on a line by itself\r\n')
-            self.log.debug('SMTP: %s now sending data' % self.peeraddr)
-            self.set_terminator('data')
+            if len(self.msg.to) > 0 and self.msg.sender != None:
+                self.pushs('354 Enter mail, end with "." on a line by itself\r\n')
+                self.log.debug('SMTP: %s now sending data' % self.peeraddr)
+                self.set_terminator('data')
+            else:
+                self.pushs('503 Bad sequence of commands\r\n')
+                self.log.debug('SMTP: %s data too early' % self.peeraddr)
         elif cmd == b'QUIT':
             self.pushs('221 %s closing connection\r\n' % self.host)
             self.log.debug('SMTP: %s quit' % self.peeraddr)

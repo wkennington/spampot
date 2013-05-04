@@ -1,6 +1,5 @@
 # Milestone 1
   Perform extra validation on email addresses in the SMTP module
-  Perform validation of at least 1 TO and FROM before DATA can be used
 # Milestone 2
   Ability to restrict message flow
   Logging of all sent message
