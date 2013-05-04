@@ -17,11 +17,14 @@
 
 """
 
+Msg = namedtuple('Msg', ['to', 'cc', 'bcc', 'from', 'sub', 'data'])
+
 class BaseHandler:
-    pass
+    def handle(msg):
+        pass
 
 class FileHandler(BaseHandler):
-    pass
+    def handle(msg):
 
 class SendHandler(BaseHandler):
-    pass
+    def handle(msg):
