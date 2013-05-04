@@ -18,13 +18,17 @@
 
 """
 import smtp
-import os
+import os, sys
 import configparser
 import argparse
 import logging, logging.handlers
 
 def serve(log, config):
     log.debug('Opening Server')
+    pidfile = config['Global'].get('pidfile', None)
+    if pidfile != None:
+        file(pidfile, 'w').write(str(os.getpid()))
+        log.debug('Wrote pidfile %s' % pidfile)
     addr = config['Global'].get('addr', '0.0.0.0')
     port = config['Global'].get('port', 25)
     host = config['Global'].get('host', 'localhost')
@@ -90,13 +94,20 @@ def run():
     # Setup the logger
     logger = logging.getLogger('Global')
     logger.setLevel(log_level)
-    for log in [log for log in logs if daemon and log != '-']:
+    if daemon and logs == ['-']:
+        logs = ['syslog']
+    for log in logs:
         if log == 'syslog':
             logger.addHandler(logging.handlers.SysLogHandler())
-        if log == '-':
-            logger.addHandler(logging.handlers.StreamHandler(sys.stdout))
+        elif log == '-' and not daemon:
+            logger.addHandler(logging.StreamHandler(sys.stdout))
         else:
             logger.addHandler(logging.handlers.RotatingFileHandler(log))
+
+    # Debugging Log Output
+    logger.warning('Using Log Level %s' % log_level)
+    logger.debug('Effective Log Level %d' % logger.getEffectiveLevel())
+    logger.info('Spawning as %s' % ('daemon' if daemon else 'normal'))
 
     # Perform the requested service
     daemonize(logger, config) if daemon else normal(logger, config)
