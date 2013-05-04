@@ -1,5 +1,5 @@
 """
-    Spampot SMTP Server Implementation
+    Spampot Mail Handlers
     Copyright (C) 2013 William A. Kennington III
 
     This program is free software: you can redistribute it and/or modify
@@ -17,25 +17,11 @@
 
 """
 
-import socket
+class BaseHandler:
+    pass
 
-class SMTPHandler:
-    def __init__(self, conn, addr):
-        self.conn = conn
-        self.addr = addr
-    def handle(self):
-        self.conn.shutdown(socket.SHUT_RDWR)
+class FileHandler(BaseHandler):
+    pass
 
-class SMTP:
-    def __init__(self, addr='0.0.0.0', port=25, host='localhost'):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.sock.bind((addr, port))
-        self.sock.listen(10)
-
-    def accept(self):
-        conn, addr = self.sock.accept()
-        return SMTPHandler(conn, addr)
-
-    def cleanup(self):
-        self.sock.close()
+class SendHandler(BaseHandler):
+    pass

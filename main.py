@@ -18,6 +18,7 @@
 
 """
 import smtp
+import pool
 import os, sys
 import signal
 import configparser
@@ -53,8 +54,14 @@ def serve(log, config):
     # Setup the kill signal
     signal.signal(signal.SIGINT, (lambda signum, frame: death(pidfile, log, server)))
 
+    # Create the worker pool
+    log.debug('Spawning Workers')
+
     # Run the server
-    server.run()
+    log.info('Accepting Connections on %s:%d', addr, port)
+    log.info('Using Hostname %s', host)
+    h = server.accept()
+    h.handle()
     death(pidfile, log, server)
 
 def daemonize(log, config):
