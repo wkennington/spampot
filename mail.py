@@ -19,7 +19,7 @@
 
 from collections import namedtuple
 
-Msg = namedtuple('Msg', ['to', 'cc', 'bcc', 'sender', 'data'])
+Msg = namedtuple('Msg', ['to', 'sender', 'data'])
 
 class BaseHandler:
     def handle(self, msg, msg_count):

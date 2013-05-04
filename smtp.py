@@ -27,6 +27,7 @@ class SMTPHandler(asynchat.async_chat):
         self.push(msg.encode('utf-8'))
 
     def __init__(self, sock, log, handlers, host):
+        self.found_terminator = header_found_terminator
         asynchat.async_chat.__init__(self, sock=sock)
         self.peeraddr = str(self.getpeername())
         self.peername = None
@@ -42,7 +43,7 @@ class SMTPHandler(asynchat.async_chat):
         self.pushs('220 %s ESMTP Sendmail 8.14.7\r\n' % self.host)
 
     def reset(self):
-        self.msg = mail.Msg(to=[], cc=[], bcc=[], sender=None, data=None)
+        self.msg = mail.Msg(to=[], sender=None, data=None)
 
     def handle_close(self):
         if self.msg_count == 0:
@@ -54,7 +55,12 @@ class SMTPHandler(asynchat.async_chat):
     def collect_incoming_data(self, data):
         self.buff += data
 
-    def found_terminator(self):
+    def parseKeyword(self, args, key):
+        args = args.strip()
+        idx = args.find(key)
+        return None if idx == -1 else args[idx+len(key):].strip()
+
+    def header_found_terminator(self):
         # Get the data
         data = self.buff
         self.buff = b''
@@ -69,7 +75,44 @@ class SMTPHandler(asynchat.async_chat):
             self.peername = args
             self.log.debug('%s is named %s' % (self.peeraddr, self.peername))
             self.pushs('250 Hello %s, please to meet you\r\n' % self.peername)
-        print('Cmd: %s' % cmd)
+        elif command == b'MAIL':
+            act = self.parseKeyword(args, 'FROM:')
+            if act == None:
+                self.log.debug('%s sent invalid mail cmd: %s' % (self.peeraddr, args))
+                self.pushs('500 Invalid Params\r\n')
+            else:
+                self.log.debug('%s mail from %s' % (self.peeraddr, act))
+                self.msg.sender = act
+                self.pushs('250 Ok\r\n')
+        elif command == b'RCPT':
+            act = self.parseKeyword(args, 'TO:')
+            if == None:
+                self.log.debug('%s invalid rcpt cmd: %s' % (self.peeraddr, args))
+                self.pushs('500 Invalid Params\r\n')
+            else:
+                self.log.debug('%s added rcpt %s' % (self.peeraddr, act))
+                self.msg.to.append(act)
+                self.pushs('250 Ok\r\n')
+        elif command == b'DATA':
+            self.pushs('354 Enter mail, end with "." on a line by itself\r\n')
+            self.log.debug('%s now sending data' % self.peeraddr)
+            self.set_terminator(b'\r\n.\r\n')
+            self.found_terminator = data_found_terminator
+        elif command == b'QUIT':
+            self.pushs('221 %s closing connection\r\n' % self.host)
+            self.log.debug('%s quit' % self.peeraddr)
+            self.close_when_done()
+        elif command == b'RSET':
+            self.reset()
+            self.log.debug('%s reset state' % self.peeraddr)
+            self.pushs('250 Reset state\r\n')
+        else:
+            self.pushs('500 Command unrecognized\r\n')
+            self.log.debug('%s sent invalid command: %s' % (self.peeraddr, cmd))
+
+    def data_found_terminator(self):
+        self.set_terminator(b'\r\n')
+        self.found_terminator = header_found_terminator
         
 
 class SMTP(asyncore.dispatcher):
