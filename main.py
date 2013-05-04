@@ -24,6 +24,8 @@ import configparser
 import argparse
 import logging, logging.handlers
 
+import pwd, grp
+
 def death(pidfile):
     if pidfile != None:
         os.unlink(pidfile)
@@ -70,7 +72,27 @@ def daemonize(log, config):
     # Decouple from parent environment
     os.chdir("/") 
     os.setsid() 
-    os.umask(0) 
+    os.umask(0)
+
+    # Drop user / group permissions
+    udown = config['Global'].get('user', None)
+    gdown = config['Global'].get('group', None)
+    try:
+        if udown != None:
+            uid = pwd.getpwnam(udown).pw_uid
+        if gdown != None:
+            gid = grp.getgrnam(gdown).gr_gid
+    except:
+        log.error('Failed to get User / Group Ids. Maybe they don\'t exist?')
+        exit(1)
+    try:
+        if gdown != None:
+            os.setgid(gid)
+        if udown != None:
+            os.setuid(uid)
+    except:
+        log.error('Cannot Drop User / Group Privileges. Probably not running as root?')
+        exit(1)
 
     # Perform the second fork
     try: 
@@ -107,7 +129,7 @@ def run():
     # Merge config with command line arguments
     logs = args.logs if args.logs else config['Global'].get('log', 'syslog').split(' ')
     log_level = args.log_level if args.log_level else config['Global'].get('log_level', 'INFO').upper()
-    daemon = args.daemon if args.daemon == None else config['Global'].get('daemon', True)
+    daemon = args.daemon if args.daemon != None else config['Global'].get('daemon', True)
 
     # Setup the logger
     logger = logging.getLogger('Global')
