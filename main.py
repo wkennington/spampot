@@ -29,18 +29,18 @@ def serve(log, config):
     server.run()
     exit(0)
 
-def daemonize(log_name, config):
-    if log_name == '-':
-        pass
+def daemonize(logs, config):
     pass
 
-def normal(log_name, config):
+def normal(logs, config):
     pass
 
 def run():
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description='Spawn the spampot server')
-    parser.add_argument('--conf', dest='conf', metavar='c', type=str, default='spampot.conf', help='Configuration file to read')
+    parser.add_argument('--conf', '-c', dest='conf', metavar='c', type=str, default='spampot.conf', help='Configuration file to read')
+    parser.add_argument('--daemon', '-d', metavar='d', dest='daemon', type=bool, default=None, help='False to serve in current process or True to spawn workers')
+    parser.add_argument('--log', '-l', dest='logs', metavar='file', type=str, default=None, nargs='+', help='The logfile[s] to write into')
     args = parser.parse_args()
 
     # Read the default configuration file
@@ -49,13 +49,13 @@ def run():
     if not ('Global' in config.sections()):
         print('Configuration file is missing the "Global" section')
         exit(1)
-    log = config['Global'].get('log', 'syslog')
+
+    # Merge config with command line arguments
+    logs = args.logs if args.logs else config['Global'].get('log', 'syslog').split(' ')
+    daemon = args.daemon if args.daemon == None else config['Global'].get('daemon', True)
 
     # Perform the requested service
-    if config['Global'].get('daemon', True):
-        daemonize(log, config)
-    else:
-        normal(log, config)
+    daemonize(logs, config) if daemon else normal(logs, config)
 
     exit(0)
 
