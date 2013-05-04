@@ -26,7 +26,7 @@ import logging, logging.handlers
 
 import pwd, grp
 
-def death(pidfile):
+def death(pidfile, log):
     if pidfile != None:
         os.unlink(pidfile)
     exit(0)
@@ -43,8 +43,8 @@ def serve(log, config):
         open(pidfile, 'w').write(str(os.getpid()))
         log.debug('Wrote pidfile %s' % pidfile)
 
-        # Hack to unlink the pidfile on exit
-        signal.signal(signal.SIGINT, (lambda signum, frame: death(pidfile)))
+    # Setup the kill signal
+    signal.signal(signal.SIGINT, (lambda signum, frame: death(pidfile, log)))
 
     # Create a new SMTP Server
     addr = config['Global'].get('addr', '0.0.0.0')
@@ -54,7 +54,7 @@ def serve(log, config):
 
     # Run the server
     server.run()
-    death(pidfile)
+    death(pidfile, log)
 
 def daemonize(log, config):
     log.debug('Forking Daemon')
@@ -114,7 +114,8 @@ def run():
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description='Spawn the spampot server')
     parser.add_argument('--conf', '-c', dest='conf', metavar='c', type=str, default='spampot.conf', help='Configuration file to read')
-    parser.add_argument('--daemon', '-d', metavar='d', dest='daemon', type=bool, default=None, help='False to serve in current process or True to spawn workers')
+    parser.add_argument('--daemon', '-d', dest='daemon', action='store_const', const=True, default=None, help='False to serve in current process or True to spawn workers')
+    parser.add_argument('--no-daemon', '-n', dest='daemon', action='store_const', const=False, default=None, help='False to serve in current process or True to spawn workers')
     parser.add_argument('--log-level', '-L', metavar='L', dest='log_level', type=str, default=None, help='Level of Logging to display')
     parser.add_argument('--log', '-l', dest='logs', metavar='file', type=str, default=None, nargs='+', help='The logfile[s] to write into')
     args = parser.parse_args()
