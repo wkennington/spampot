@@ -18,13 +18,11 @@
 
 """
 import smtp
-import pool
 import os, sys
 import signal
 import configparser
 import argparse
 import logging, logging.handlers
-
 import pwd, grp
 
 def death(pidfile, log, server):
@@ -49,19 +47,16 @@ def serve(log, config):
     addr = config['Global'].get('addr', '0.0.0.0')
     port = config['Global'].get('port', 25)
     host = config['Global'].get('host', 'localhost')
-    server = smtp.SMTP(host=host, port=port, addr=addr)
+    server = smtp.SMTP(log, host=host, port=port, addr=addr)
 
     # Setup the kill signal
     signal.signal(signal.SIGINT, (lambda signum, frame: death(pidfile, log, server)))
 
-    # Create the worker pool
-    log.debug('Spawning Workers')
-
     # Run the server
     log.info('Accepting Connections on %s:%d', addr, port)
     log.info('Using Hostname %s', host)
-    h = server.accept()
-    h.handle()
+    while True:
+        server.run()
     death(pidfile, log, server)
 
 def daemonize(log, config):

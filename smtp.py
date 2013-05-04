@@ -17,25 +17,43 @@
 
 """
 
+import asyncore
 import socket
 
-class SMTPHandler:
-    def __init__(self, conn, addr):
-        self.conn = conn
-        self.addr = addr
-    def handle(self):
-        self.conn.shutdown(socket.SHUT_RDWR)
+class SMTPHandler(asyncore.dispatcher_with_send):
+    def __init__(self, sock, log):
+        asyncore.dispatcher_with_send.__init__(self, sock)
+        self.buff = b''
+        self.log = log
 
-class SMTP:
-    def __init__(self, addr='0.0.0.0', port=25, host='localhost'):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.sock.bind((addr, port))
-        self.sock.listen(10)
+    def handle_read(self):
+        data = self.recv(8192)
+        if data:
+            self.buff += data
+            idx = self.buff.find(b'\r\n')
+            while idx > 0:
+                self.cmd(self.buff[:idx])
+                self.buff = self.buff[idx+2:]
+                idx = self.buff.find(b'\r\n')
 
-    def accept(self):
-        conn, addr = self.sock.accept()
-        return SMTPHandler(conn, addr)
+    def cmd(self, data):
+        self.log.info('Got CMD: %s' % data)
+
+class SMTP(asyncore.dispatcher):
+    def __init__(self, log, addr='0.0.0.0', port=25, host='localhost'):
+        self.log = log
+        asyncore.dispatcher.__init__(self)
+        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.set_reuse_addr()
+        self.bind((addr, port))
+        self.listen(10)
+
+    def handle_accepted(self, sock, addr):
+        self.log.info('Connection from %s' % str(addr))
+        handler = SMTPHandler(sock, self.log)
+
+    def run(self):
+        asyncore.loop()
 
     def cleanup(self):
-        self.sock.close()
+        self.close()
