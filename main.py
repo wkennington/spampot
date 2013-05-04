@@ -18,10 +18,13 @@
 
 """
 import smtp
+import os
 import configparser
 import argparse
+import logging, logging.handlers
 
 def serve(log, config):
+    log.debug('Opening Server')
     addr = config['Global'].get('addr', '0.0.0.0')
     port = config['Global'].get('port', 25)
     host = config['Global'].get('host', 'localhost')
@@ -29,17 +32,46 @@ def serve(log, config):
     server.run()
     exit(0)
 
-def daemonize(logs, config):
-    pass
+def daemonize(log, config):
+    log.debug('Forking Daemon')
 
-def normal(logs, config):
-    pass
+    # Perform the first fork
+    try: 
+        pid = os.fork() 
+        if pid > 0:
+            exit(0) 
+        log.debug('First Fork to pid %d' % pid)
+    except OSError as e:
+        log.error('Failed to fork daemon process')
+        exit(1)
+
+    # Decouple from parent environment
+    os.chdir("/") 
+    os.setsid() 
+    os.umask(0) 
+
+    # Perform the second fork
+    try: 
+        pid = os.fork() 
+        if pid > 0:
+            exit(0) 
+        log.debug('Second Fork to pid %d' % pid)
+    except OSError as e:
+        log.error('Failed to fork daemon process')
+        exit(1) 
+
+    # Begin Execution
+    serve(log, config) 
+
+def normal(log, config):
+    serve(log, config)
 
 def run():
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description='Spawn the spampot server')
     parser.add_argument('--conf', '-c', dest='conf', metavar='c', type=str, default='spampot.conf', help='Configuration file to read')
     parser.add_argument('--daemon', '-d', metavar='d', dest='daemon', type=bool, default=None, help='False to serve in current process or True to spawn workers')
+    parser.add_argument('--log-level', '-L', metavar='L', dest='log_level', type=str, default=None, help='Level of Logging to display')
     parser.add_argument('--log', '-l', dest='logs', metavar='file', type=str, default=None, nargs='+', help='The logfile[s] to write into')
     args = parser.parse_args()
 
@@ -52,10 +84,22 @@ def run():
 
     # Merge config with command line arguments
     logs = args.logs if args.logs else config['Global'].get('log', 'syslog').split(' ')
+    log_level = args.log_level if args.log_level else config['Global'].get('log_level', 'INFO').upper()
     daemon = args.daemon if args.daemon == None else config['Global'].get('daemon', True)
 
+    # Setup the logger
+    logger = logging.getLogger('Global')
+    logger.setLevel(log_level)
+    for log in [log for log in logs if daemon and log != '-']:
+        if log == 'syslog':
+            logger.addHandler(logging.handlers.SysLogHandler())
+        if log == '-':
+            logger.addHandler(logging.handlers.StreamHandler(sys.stdout))
+        else:
+            logger.addHandler(logging.handlers.RotatingFileHandler(log))
+
     # Perform the requested service
-    daemonize(logs, config) if daemon else normal(logs, config)
+    daemonize(logger, config) if daemon else normal(logger, config)
 
     exit(0)
 
