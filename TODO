@@ -1,5 +1,4 @@
 # Milestone 1
-  Working SMTP Relay Server
   Perform extra validation on email addresses in the SMTP module
   Perform validation of at least 1 TO and FROM before DATA can be used
 # Milestone 2
