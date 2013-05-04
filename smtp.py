@@ -19,7 +19,7 @@
 
 import asyncore, asynchat
 import socket
-import mail
+import mh.base as mail
 import time
 
 class SMTPHandler(asynchat.async_chat):
@@ -126,6 +126,7 @@ class SMTPHandler(asynchat.async_chat):
         self.msg.data = self.buff
         self.buff = b''
         for handler in self.handlers:
+            log.debug('SMTP: %s called handler %s' % (self.peeraddr, handler.__name__))
             handler.handle(self.msg)
         self.msg_count += 1
         self.reset()
