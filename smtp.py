@@ -17,8 +17,18 @@
 
 """
 
+import socket
+
 class SMTP:
     def __init__(self, addr='0.0.0.0', port=25, host='localhost'):
-        pass
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.sock.bind((addr, port))
+        self.sock.listen(10)
+
     def run(self):
-        pass
+        conn, addr = self.sock.accept()
+        conn.shutdown(socket.SHUT_RDWR)
+
+    def cleanup(self):
+        self.sock.close()

@@ -26,9 +26,10 @@ import logging, logging.handlers
 
 import pwd, grp
 
-def death(pidfile, log):
+def death(pidfile, log, server):
     if pidfile != None:
         os.unlink(pidfile)
+    server.cleanup()
     exit(0)
 
 def serve(log, config):
@@ -43,18 +44,18 @@ def serve(log, config):
         open(pidfile, 'w').write(str(os.getpid()))
         log.debug('Wrote pidfile %s' % pidfile)
 
-    # Setup the kill signal
-    signal.signal(signal.SIGINT, (lambda signum, frame: death(pidfile, log)))
-
     # Create a new SMTP Server
     addr = config['Global'].get('addr', '0.0.0.0')
     port = config['Global'].get('port', 25)
     host = config['Global'].get('host', 'localhost')
     server = smtp.SMTP(host=host, port=port, addr=addr)
 
+    # Setup the kill signal
+    signal.signal(signal.SIGINT, (lambda signum, frame: death(pidfile, log, server)))
+
     # Run the server
     server.run()
-    death(pidfile, log)
+    death(pidfile, log, server)
 
 def daemonize(log, config):
     log.debug('Forking Daemon')
