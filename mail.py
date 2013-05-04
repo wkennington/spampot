@@ -25,6 +25,8 @@ class BaseHandler:
 
 class FileHandler(BaseHandler):
     def handle(msg):
+        pass
 
 class SendHandler(BaseHandler):
     def handle(msg):
+        pass
