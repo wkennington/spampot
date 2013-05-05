@@ -164,7 +164,7 @@ def run():
     for sec in config.sections():
         if sec.lower() != 'global' and config[sec].get('Enabled', 'False').lower() in ['true', 't', '1']:
             mod = __import__('mh.%s' % sec.lower(), fromlist=['Handler'])
-            handler = getattr(mod, 'Handler')(log, config)
+            handler = getattr(mod, 'Handler')(logger, config)
             handlers.append(handler)
             logger.info('Using handler %s' % sec)
 
