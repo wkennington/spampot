@@ -42,7 +42,7 @@ import struct
 import maildir # get maildir.py from the same place you got this file
 
 # suid to this user
-USER = 'root'
+USER = 'nobody'
 
 # host to relay probes for us
 SMARTHOST = '127.0.0.1'
@@ -56,7 +56,7 @@ SAVEDUPES = False
 TARPIT = True
 
 # chroot to this directory and spool messages there
-MAILDIR = '/home/spampot/logs'
+MAILDIR = '/var/local/spam'
 
 # My hostname
 HOST = socket.gethostname()
