@@ -19,6 +19,7 @@
 """
 import smtp
 import os, sys
+import glob
 import signal
 import configparser
 import argparse
@@ -43,11 +44,20 @@ def serve(log, config):
         open(pidfile, 'w').write(str(os.getpid()))
         log.debug('Wrote pidfile %s' % pidfile)
 
+    # Setup additional handlers
+    handlers = []
+    for sec in config.sections():
+        if sec.lower() != 'global' and config[sec].get('Enabled', 'False').lower() in ['true', 't', '1']:
+            mod = __import__('mh.%s' % sec.lower(), fromlist=['Handler'])
+            handler = getattr(mod, 'Handler')(log, config)
+            handlers.append(handler)
+            log.debug('Using handler %s' % sec)
+
     # Create a new SMTP Server
     addr = config['Global'].get('addr', '0.0.0.0')
     port = config['Global'].get('port', 25)
     host = config['Global'].get('host', 'localhost')
-    server = smtp.SMTP(log, host=host, port=port, addr=addr)
+    server = smtp.SMTP(log, host=host, port=port, addr=addr, handlers=handlers)
 
     # Setup the kill signal
     signal.signal(signal.SIGINT, (lambda signum, frame: death(pidfile, log, server)))
@@ -129,6 +139,12 @@ def run():
     if not ('Global' in config.sections()):
         print('Configuration file is missing the "Global" section')
         exit(1)
+
+    # Read additional configuration files
+    config_dir = config['Global'].get('config_dir', None)
+    if config_dir != None:
+        for conf in glob.glob('%s/*.conf' % config_dir):
+            config.read(conf)
 
     # Merge config with command line arguments
     logs = args.logs if args.logs else config['Global'].get('log', 'syslog').split(' ')

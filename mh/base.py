@@ -23,7 +23,12 @@ class Msg:
         self.sender = sender
         self.data = data
 
-class BaseHandler:
+class Handler:
     __name__ = 'Unnamed'
+
+    def __init__(self, log, config):
+        self.log = log
+        self.config = config
+
     def handle(self, msg):
-        pass
+        self.log.debug('UNNAMED: Default Handler Action')

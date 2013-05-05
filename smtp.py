@@ -126,16 +126,16 @@ class SMTPHandler(asynchat.async_chat):
         self.msg.data = self.buff
         self.buff = b''
         for handler in self.handlers:
-            log.debug('SMTP: %s called handler %s' % (self.peeraddr, handler.__name__))
+            self.log.debug('SMTP: %s called handler %s' % (self.peeraddr, handler.__name__))
             handler.handle(self.msg)
         self.msg_count += 1
         self.reset()
         self.log.debug('SMTP: %s processed data' % self.peeraddr)
 
 class SMTP(asyncore.dispatcher):
-    def __init__(self, log, addr='0.0.0.0', port=25, host='localhost'):
+    def __init__(self, log, addr='0.0.0.0', port=25, host='localhost', handlers=[]):
         self.log = log
-        self.handlers = []
+        self.handlers = handlers
         self.host = host
         asyncore.dispatcher.__init__(self)
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
