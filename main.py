@@ -53,6 +53,11 @@ def serve(log, config, handlers):
     # Setup the kill signal
     signal.signal(signal.SIGINT, (lambda signum, frame: death(pidfile, log, server)))
 
+    # Chroot directory if necessary
+    chroot = config['Global'].get('chroot', None)
+    if chroot != None:
+        os.chroot(chroot)
+
     # Run the server
     log.info('Accepting Connections on %s:%d', addr, port)
     log.info('Using Hostname %s', host)
