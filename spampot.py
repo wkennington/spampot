@@ -237,13 +237,9 @@ class Server(asynchat.async_chat):
         self.reset()
 
     def relay_message(self):
-        cmd = "/usr/lib/sendmail -f %s %s" % (shescape(self.mailfrom),' '.join([shescape(s) for s in self.rcptto]))
-        #cmd = "/usr/lib/sendmail -f %s %s < /mail" % (shescape(self.mailfrom),' '.join([shescape(s) for s in self.rcptto]))
-        #os.system(cmd)
-        #self.log(cmd)
-        s = os.popen(cmd,'w')
+        cmd = "/usr/lib/sendmail -f %s %s" % (shescape(self.mailfrom), ' '.join([shescape(s) for s in self.rcptto]))
+        s = os.popen(cmd, 'w')
         s.write(self.message)
-        #self.log(self.message)
         s.close()
 
     probe_re = None
