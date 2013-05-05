@@ -42,7 +42,7 @@ import struct
 import maildir # get maildir.py from the same place you got this file
 
 # suid to this user
-USER = 'nobody'
+USER = 'spam'
 
 # host to relay probes for us
 SMARTHOST = '127.0.0.1'
@@ -122,8 +122,7 @@ class Daemon:
             pw = pwd.getpwnam(user)
             uid = pw[2]
             if not gid: gid = pw[3]
-        #os.chroot(root)
-        os.chdir('/')
+        os.chroot(root)
         if gid: os.setgid(gid)
         if uid: os.setuid(uid)
 
