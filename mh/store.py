@@ -1,5 +1,5 @@
 """
-    Spampot Mail Handler Template
+    Spampot Storage Mail Handler
     Copyright (C) 2013 William A. Kennington III
 
     This program is free software: you can redistribute it and/or modify
@@ -24,11 +24,11 @@ class Msg:
         self.data = data
 
 class Handler:
-    __name__ = 'Unnamed'
+    __name__ = 'Store'
 
     def __init__(self, log, config):
         self.log = log
         self.config = config
 
     def handle(self, addr, msg):
-        self.log.debug('UNNAMED: Default Handler Action')
+        self.log.debug('STORE: Default Handler Action')
