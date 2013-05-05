@@ -233,24 +233,24 @@ class Server(asynchat.async_chat):
         self.set_terminator('\r\n')
         self.found_terminator = self.envelope_found_terminator
         self.deliver_message()
-	self.push("250 Mail accepted\r\n")
+        self.push("250 Mail accepted\r\n")
         self.reset()
 
     def relay_message(self):
-	cmd = "/usr/lib/sendmail -f %s %s" % (shescape(self.mailfrom),' '.join([shescape(s) for s in self.rcptto]))
-	#cmd = "/usr/lib/sendmail -f %s %s < /mail" % (shescape(self.mailfrom),' '.join([shescape(s) for s in self.rcptto]))
-	#os.system(cmd)
-	#self.log(cmd)
+        cmd = "/usr/lib/sendmail -f %s %s" % (shescape(self.mailfrom),' '.join([shescape(s) for s in self.rcptto]))
+        #cmd = "/usr/lib/sendmail -f %s %s < /mail" % (shescape(self.mailfrom),' '.join([shescape(s) for s in self.rcptto]))
+        #os.system(cmd)
+        #self.log(cmd)
         s = os.popen(cmd,'w')
         s.write(self.message)
-	#self.log(self.message)
+        #self.log(self.message)
         s.close()
 
     probe_re = None
 
     def is_probe(self):
         """Returns true if the current message is a probe message"""
-	return True
+        return True
 
         # Compile the probe regular expression the first time through
         if not self.probe_re:
@@ -304,8 +304,8 @@ class Server(asynchat.async_chat):
             self.relay_message()
             self.log('Relayed probe from=%s to=%s' % (self.mailfrom, self.rcptto))
             headers.append("SMTP-Relayed: Yes")
-	if(not seen.has_key(self.peername)):
-		seen[self.peername] = 0
+        if(not seen.has_key(self.peername)):
+                seen[self.peername] = 0
         msg_count = seen.get(self.peername) + 1
         seen[self.peername] = msg_count
         if msg_count in (0, 1, 2, 3, 4, 8, 64, 512, 4096, 32768, 262144):
