@@ -32,7 +32,7 @@ def death(pidfile, log, server):
     server.cleanup()
     exit(0)
 
-def serve(log, config):
+def serve(log, config, handlers):
     log.debug('Opening Server')
 
     # Setup operations based on the pidfile
@@ -69,7 +69,7 @@ def serve(log, config):
         server.run()
     death(pidfile, log, server)
 
-def daemonize(log, config):
+def daemonize(log, config, handlers):
     log.debug('Forking Daemon')
 
     # Perform the first fork
@@ -118,10 +118,10 @@ def daemonize(log, config):
         exit(1) 
 
     # Begin Execution
-    serve(log, config) 
+    serve(log, config, handlers)
 
-def normal(log, config):
-    serve(log, config)
+def normal(log, config, handlers):
+    serve(log, config, handlers)
 
 def run():
     # Parse the command line arguments
@@ -167,10 +167,19 @@ def run():
     # Debugging Log Output
     logger.warning('Using Log Level %s' % log_level)
     logger.debug('Effective Log Level %d' % logger.getEffectiveLevel())
-    logger.info('Spawning as %s' % ('daemon' if daemon else 'normal'))
+
+    # Setup additional handlers
+    handlers = []
+    for sec in config.sections():
+        if sec.lower() != 'global' and config[sec].get('Enabled', 'False').lower() in ['true', 't', '1']:
+            mod = __import__('mh.%s' % sec.lower(), fromlist=['Handler'])
+            handler = getattr(mod, 'Handler')(log, config)
+            handlers.append(handler)
+            logger.info('Using handler %s' % sec)
 
     # Perform the requested service
-    daemonize(logger, config) if daemon else normal(logger, config)
+    logger.info('Spawning as %s' % ('daemon' if daemon else 'normal'))
+    daemonize(logger, config, handlers) if daemon else normal(logger, config, handlers)
 
     exit(0)
 
