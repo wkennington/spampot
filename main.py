@@ -48,7 +48,11 @@ def serve(log, config, handlers):
     addr = config['Global'].get('addr', '0.0.0.0')
     port = config['Global'].get('port', 25)
     host = config['Global'].get('host', 'localhost')
-    server = smtp.SMTP(log, host=host, port=port, addr=addr, handlers=handlers)
+    try:
+        server = smtp.SMTP(log, host=host, port=port, addr=addr, handlers=handlers)
+    except:
+        log.error('Failed to bind server to socket %s:%d' % (host, port))
+        exit(1)
 
     # Setup the kill signal
     signal.signal(signal.SIGINT, (lambda signum, frame: death(pidfile, log, server)))
@@ -58,9 +62,31 @@ def serve(log, config, handlers):
     if chroot != None:
         try:
             os.chroot(chroot)
-            log.debug('Chrooted into %s' % chroot)
+            log.info('Chrooted into %s' % chroot)
         except:
             log.error('Failed to Chroot into %s' % chroot)
+
+    # Drop user / group permissions
+    udown = config['Global'].get('user', None)
+    gdown = config['Global'].get('group', None)
+    try:
+        if udown != None:
+            uid = pwd.getpwnam(udown).pw_uid
+        if gdown != None:
+            gid = grp.getgrnam(gdown).gr_gid
+    except:
+        log.error('Failed to get User / Group Ids. Maybe they don\'t exist?')
+        exit(1)
+    try:
+        if gdown != None:
+            log.info('Dropped group privileges to %s' % gdown)
+            os.setgid(gid)
+        if udown != None:
+            log.info('Dropped user privileges to %s' % udown)
+            os.setuid(uid)
+    except:
+        log.error('Cannot Drop User / Group Privileges. Probably not running as root?')
+        exit(1)
 
     # Run the server
     log.info('Accepting Connections on %s:%d', addr, port)
@@ -86,26 +112,6 @@ def daemonize(log, config, handlers):
     os.chdir("/") 
     os.setsid() 
     os.umask(0)
-
-    # Drop user / group permissions
-    udown = config['Global'].get('user', None)
-    gdown = config['Global'].get('group', None)
-    try:
-        if udown != None:
-            uid = pwd.getpwnam(udown).pw_uid
-        if gdown != None:
-            gid = grp.getgrnam(gdown).gr_gid
-    except:
-        log.error('Failed to get User / Group Ids. Maybe they don\'t exist?')
-        exit(1)
-    try:
-        if gdown != None:
-            os.setgid(gid)
-        if udown != None:
-            os.setuid(uid)
-    except:
-        log.error('Cannot Drop User / Group Privileges. Probably not running as root?')
-        exit(1)
 
     # Perform the second fork
     try: 
