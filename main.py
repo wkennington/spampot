@@ -44,15 +44,6 @@ def serve(log, config, handlers):
         open(pidfile, 'w').write(str(os.getpid()))
         log.debug('Wrote pidfile %s' % pidfile)
 
-    # Setup additional handlers
-    handlers = []
-    for sec in config.sections():
-        if sec.lower() != 'global' and config[sec].get('Enabled', 'False').lower() in ['true', 't', '1']:
-            mod = __import__('mh.%s' % sec.lower(), fromlist=['Handler'])
-            handler = getattr(mod, 'Handler')(log, config)
-            handlers.append(handler)
-            log.debug('Using handler %s' % sec)
-
     # Create a new SMTP Server
     addr = config['Global'].get('addr', '0.0.0.0')
     port = config['Global'].get('port', 25)
