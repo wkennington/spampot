@@ -80,7 +80,7 @@ class SMTPHandler(asynchat.async_chat):
         if cmd in [b'HELO', b'EHLO']:
             self.peername = args
             self.log.debug('SMTP: %s is named %s' % (self.peeraddr, self.peername))
-            self.pushs('250 Hello %s, please to meet you\r\n' % self.peername)
+            self.pushs('250 Hello %s, pleased to meet you\r\n' % self.peername)
         elif cmd == b'MAIL':
             act = self.parseKeyword(args, 'FROM:')
             if act == None:
