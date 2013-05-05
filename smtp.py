@@ -68,9 +68,8 @@ class SMTPHandler(asynchat.async_chat):
         return None if idx == -1 else args[idx+len(key):].strip()
 
     def header_found_terminator(self):
-        # Get the data
-        data = self.buff
-        self.buff = b''
+        # Get the buffered data
+        data, self.buff = self.buff, b''
 
         # Get the command and arguments
         idx = data.find(b' ')
@@ -123,8 +122,7 @@ class SMTPHandler(asynchat.async_chat):
     def data_found_terminator(self):
         self.set_terminator('header')
         self.pushs('250 Mail accepted\r\n')
-        self.msg.data = self.buff
-        self.buff = b''
+        self.msg.data, self.buff = self.buff = b''
         for handler in self.handlers:
             self.log.debug('SMTP: %s called handler %s' % (self.peeraddr, handler.__name__))
             handler.handle(self.getpeername(), self.msg)
