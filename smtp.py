@@ -37,7 +37,7 @@ class SMTPHandler(asynchat.async_chat):
     def __init__(self, sock, log, handlers, host):
         asynchat.async_chat.__init__(self, sock=sock)
         self.set_terminator('header')
-        self.peeraddr = str(self.getpeername())
+        self.peeraddr, self.peerport = self.getpeername()
         self.peername = None
         self.msg_count = 0
         self.buff = b''

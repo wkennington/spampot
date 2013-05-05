@@ -17,12 +17,6 @@
 
 """
 
-class Msg:
-    def __init__(self, to, sender, data):
-        self.to = to
-        self.sender = sender
-        self.data = data
-
 class Handler:
     __name__ = 'Probe'
 

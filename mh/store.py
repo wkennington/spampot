@@ -17,11 +17,8 @@
 
 """
 
-class Msg:
-    def __init__(self, to, sender, data):
-        self.to = to
-        self.sender = sender
-        self.data = data
+import os
+import datetime
 
 class Handler:
     __name__ = 'Store'
@@ -29,6 +26,41 @@ class Handler:
     def __init__(self, log, config):
         self.log = log
         self.config = config
+        try:
+            self.mdir = config.get('dir')
+            if os.path.isdir(self.mdir):
+                log.debug('STORE: Using mail directory %s' % self.mdir)
+            else:
+                log.error('STORE: Mail directory %s doesn\'t exist' % self.mdir)
+                exit(1)
+        except:
+            log.error('STORE: No mail directory configured')
+            exit(1)
+
+    def createDir(self, d):
+        try:
+            if not os.path.isdir(d):
+                if os.path.exists(d):
+                    os.unlink(d)
+                os.mkdir(d)
+            return True
+        except:
+            self.log.error('STORE: Failed to create mail directory %s', d)
+            return False
 
     def handle(self, addr, msg):
-        self.log.debug('STORE: Default Handler Action')
+        host, port = addr
+        now = datetime.datetime.now()
+        adir = '%s/%s' % (self.mdir, host)
+        ddir = '%s/%s' % (adir, now.strftime('%m-%d-%y'))
+        if (not self.createDir(adir)) or (not self.createDir(ddir)):
+            return
+
+        try:
+            fname = '%s/%s' % (ddir, now.strftime('%H:%M:%S.%f'))
+            f = open(fname, 'wb')
+            f.write(msg.data)
+            f.close()
+            self.log.debug('STORE: Saved message from %s to %s' % (host, fname))
+        except:
+            self.log.error('STORE: Failed to write message to %s' % fname)
