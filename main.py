@@ -56,7 +56,11 @@ def serve(log, config, handlers):
     # Chroot directory if necessary
     chroot = config['Global'].get('chroot', None)
     if chroot != None:
-        os.chroot(chroot)
+        try:
+            os.chroot(chroot)
+            log.debug('Chrooted into %s' % chroot)
+        except:
+            log.error('Failed to Chroot into %s' % chroot)
 
     # Run the server
     log.info('Accepting Connections on %s:%d', addr, port)
