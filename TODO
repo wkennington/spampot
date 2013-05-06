@@ -1,6 +1,5 @@
 # Milestone 2
   Ability to restrict message flow
-  Logging of all sent message
 # Milestone 3
   Add limits to state and inbound messages, pretty much limit all memory usage
   Perform extra validation on email addresses in the SMTP module
