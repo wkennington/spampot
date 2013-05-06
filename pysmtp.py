@@ -36,7 +36,7 @@ class SMTP(smtpd.SMTPServer):
         bdata = data.encode('utf-8')
         for handler in self.handlers:
             self.log.debug('PYSMTP: %s called handler %s' % (host, handler.__name__))
-            handler.handle(peer, mail.Msg(to, sender, bdata))
+            handler.handle(host, port, mail.Msg(to, sender, bdata))
 
     def cleanup(self):
         self.close()

@@ -28,11 +28,10 @@ class Handler:
         self.config = config
         self.sendmail = config.get('sendmail', '/usr/lib/sendmail')
 
-    def handle(self, addr, msg):
-        self.send(addr, msg)
+    def handle(self, host, port, msg):
+        self.send(host, msg)
 
-    def send(self, addr, msg):
-        host, port = addr
+    def send(self, host, msg):
         cmd = [self.sendmail, '-f', msg.sender] + msg.to
         read, write = os.pipe()
         os.write(write, msg.data)

@@ -24,5 +24,5 @@ class Handler:
         self.log = log
         self.config = config
 
-    def handle(self, addr, msg):
+    def handle(self, host, port, msg):
         self.log.debug('UNNAMED: Default Handler Action')
