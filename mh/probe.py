@@ -17,7 +17,7 @@
 
 """
 
-import cStringIO
+import io.StringIO
 import subprocess
 
 class Handler:
@@ -31,7 +31,7 @@ class Handler:
     def handle(self, addr, msg):
         host, port = addr
         cmd = [self.sendmail, '-f', msg.sender] + msg.to
-        inp = cStringIO.StringIO(self.data)
+        inp = io.StringIO.StringIO(self.data)
         ret = subprocess.call(cmd, shell=False, stdin=inp)
         if ret == 0:
             self.log.debug('PROBE: Sent mail from %s' % host)
