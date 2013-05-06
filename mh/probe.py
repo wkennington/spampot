@@ -17,12 +17,23 @@
 
 """
 
+import cStringIO
+import subprocess
+
 class Handler:
     __name__ = 'Probe'
 
     def __init__(self, log, config):
         self.log = log
         self.config = config
+        self.sendmail = config.get('sendmail', '/usr/lib/sendmail')
 
     def handle(self, addr, msg):
-        self.log.debug('PROBE: Default Handler Action')
+        host, port = addr
+        cmd = [self.sendmail, '-f', msg.sender] + msg.to
+        inp = cStringIO.StringIO(self.data)
+        ret = subprocess.call(cmd, shell=False, stdin=inp)
+        if ret == 0:
+            self.log.debug('PROBE: Sent mail from %s' % host)
+        else:
+            self.log.warning('PROBE: Failed to send smtp message %s' % host)
