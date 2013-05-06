@@ -19,7 +19,7 @@
 
 import asyncore
 import smtpd
-import mh.base
+import mail
 
 class SMTP(smtpd.SMTPServer):
     def __init__(self, log, addr='0.0.0.0', port=25, host='localhost', handlers=[]):
@@ -36,7 +36,7 @@ class SMTP(smtpd.SMTPServer):
         bdata = data.encode('utf-8')
         for handler in self.handlers:
             self.log.debug('PYSMTP: %s called handler %s' % (host, handler.__name__))
-            handler.handle(peer, mh.base.Msg(to, sender, bdata))
+            handler.handle(peer, mail.Msg(to, sender, bdata))
 
     def cleanup(self):
         self.close()

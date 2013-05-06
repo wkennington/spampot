@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-import smtp, pysmtp
+import csmtp, pysmtp
 import os, sys
 import glob
 import signal
@@ -54,7 +54,7 @@ def serve(log, config, handlers):
     try:
         if toBool(config['Global'].get('custom_handler', 'False')):
             log.info('Using custom SMTP Server')
-            obj = smtp.SMTP
+            obj = csmtp.SMTP
         else:
             log.info('Using built-in SMTP Server')
             obj = pysmtp.SMTP

@@ -19,7 +19,7 @@
 
 import asyncore, asynchat
 import socket
-import mh.base as mail
+import mail
 import time
 
 class SMTPHandler(asynchat.async_chat):
