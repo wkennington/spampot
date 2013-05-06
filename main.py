@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-import smtp
+import smtp, pysmtp
 import os, sys
 import glob
 import signal
@@ -52,7 +52,13 @@ def serve(log, config, handlers):
     port = int(config['Global'].get('port', '25'))
     host = config['Global'].get('host', 'localhost')
     try:
-        server = smtp.SMTP(log, host=host, port=port, addr=addr, handlers=handlers)
+        if toBool(config['Global'].get('custom_handler', 'False')):
+            log.info('Using custom SMTP Server')
+            obj = smtp.SMTP
+        else:
+            log.info('Using built-in SMTP Server')
+            obj = pysmtp.SMTP
+        server = obj(log, host=host, port=port, addr=addr, handlers=handlers)
     except:
         log.error('Failed to bind server to socket %s:%d' % (host, port))
         exit(1)
