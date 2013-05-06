@@ -46,7 +46,7 @@ def serve(log, config, handlers):
 
     # Create a new SMTP Server
     addr = config['Global'].get('addr', '0.0.0.0')
-    port = config['Global'].get('port', 25)
+    port = int(config['Global'].get('port', '25'))
     host = config['Global'].get('host', 'localhost')
     try:
         server = smtp.SMTP(log, host=host, port=port, addr=addr, handlers=handlers)
