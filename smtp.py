@@ -1,5 +1,5 @@
 """
-    Spampot SMTP Server Implementation
+    Spampot Custom SMTP Server Implementation
     Copyright (C) 2013 William A. Kennington III
 
     This program is free software: you can redistribute it and/or modify

@@ -1,5 +1,5 @@
 """
-    Spampot SMTP Server Implementation
+    Spampot Python Built-In SMTP Server Implementation
     Copyright (C) 2013 William A. Kennington III
 
     This program is free software: you can redistribute it and/or modify
