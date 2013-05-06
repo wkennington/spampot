@@ -26,6 +26,9 @@ import argparse
 import logging, logging.handlers
 import pwd, grp
 
+def toBool(s):
+    return s.lower() in ['true', 't', '1', 'yes', 'y']
+
 def death(pidfile, log, server):
     if pidfile != None:
         os.unlink(pidfile)
@@ -155,7 +158,7 @@ def run():
     # Merge config with command line arguments
     logs = args.logs if args.logs else config['Global'].get('log', 'syslog').split(' ')
     log_level = args.log_level if args.log_level else config['Global'].get('log_level', 'INFO').upper()
-    daemon = args.daemon if args.daemon != None else config['Global'].get('daemon', True)
+    daemon = args.daemon if args.daemon != None else toBool(config['Global'].get('daemon', 'True'))
 
     # Setup the logger
     logger = logging.getLogger('Global')
@@ -177,7 +180,7 @@ def run():
     # Setup additional handlers
     handlers = []
     for sec in config.sections():
-        if sec.lower() != 'global' and config[sec].get('Enabled', 'False').lower() in ['true', 't', '1']:
+        if sec.lower() != 'global' and toBool(config[sec].get('Enabled', 'False')):
             mod = __import__('mh.%s' % sec.lower(), fromlist=['Handler'])
             handler = getattr(mod, 'Handler')(logger, config[sec])
             handlers.append(handler)
