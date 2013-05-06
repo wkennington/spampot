@@ -37,6 +37,9 @@ class Handler:
             log.error('STORE: No mail directory configured')
             exit(1)
 
+    def handle(self, addr, msg):
+        self.save(addr, msg)
+
     def createDir(self, d):
         try:
             if not os.path.isdir(d):
@@ -48,7 +51,7 @@ class Handler:
             self.log.error('STORE: Failed to create mail directory %s', d)
             return False
 
-    def handle(self, addr, msg):
+    def save(self, addr, msg):
         host, port = addr
         now = datetime.datetime.now()
         adir = '%s/%s' % (self.mdir, host)

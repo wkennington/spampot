@@ -29,6 +29,9 @@ class Handler:
         self.sendmail = config.get('sendmail', '/usr/lib/sendmail')
 
     def handle(self, addr, msg):
+        self.send(addr, msg)
+
+    def send(self, addr, msg):
         host, port = addr
         cmd = [self.sendmail, '-f', msg.sender] + msg.to
         read, write = os.pipe()
