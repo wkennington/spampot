@@ -1,5 +1,6 @@
 # Milestone 2
   Logging of all messages relayed
+  Relay all messages by default
 # Milestone 1
   Working Command Line Parser
   Working Log Generator
