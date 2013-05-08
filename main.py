@@ -59,7 +59,8 @@ def serve(log, config, handlers):
                 log.info('Cleaning stale pidfile %s' % pidfile)
                 os.unlink(pidfile)
 
-        open(pidfile, 'w').write(str(os.getpid()))
+        with open(pidfile, 'w') as f:
+            f.write(str(os.getpid()))
         log.debug('Wrote pidfile %s' % pidfile)
 
     # Create a new SMTP Server
