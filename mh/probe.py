@@ -21,12 +21,20 @@ import os
 import subprocess
 
 class Handler:
-    __name__ = 'Probe'
+    __name = 'Probe'
+    __deps = []
 
-    def __init__(self, log, config):
+    def __init__(self, log, config, handlers):
         self.log = log
         self.config = config
         self.sendmail = config.get('sendmail', '/usr/lib/sendmail')
+        self.handlers = handlers
+
+    def startup(self):
+        pass
+
+    def shutdown(self):
+        pass
 
     def handle(self, host, port, msg):
         self.send(host, msg)

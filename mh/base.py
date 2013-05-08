@@ -18,11 +18,19 @@
 """
 
 class Handler:
-    __name__ = 'Unnamed'
+    __name = 'Unnamed'
+    __deps = []
 
-    def __init__(self, log, config):
+    def __init__(self, log, config, handlers):
         self.log = log
         self.config = config
+        self.handlers = handlers
+
+    def startup(self):
+        pass
+
+    def shutdown(self):
+        pass
 
     def handle(self, host, port, msg):
         self.log.debug('UNNAMED: Default Handler Action')

@@ -21,11 +21,13 @@ import os
 import datetime
 
 class Handler:
-    __name__ = 'Store'
+    __name = 'Store'
+    __deps = []
 
-    def __init__(self, log, config):
+    def __init__(self, log, config, handlers):
         self.log = log
         self.config = config
+        self.handlers = handlers
         try:
             self.mdir = config.get('dir')
             if os.path.isdir(self.mdir):
@@ -36,6 +38,12 @@ class Handler:
         except:
             log.error('STORE: No mail directory configured')
             exit(1)
+
+    def startup(self):
+        pass
+
+    def shutdown(self):
+        pass
 
     def handle(self, host, port, msg):
         self.save(host, msg)
