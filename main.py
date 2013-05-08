@@ -29,10 +29,13 @@ import pwd, grp
 def toBool(s):
     return s.lower() in ['true', 't', '1', 'yes', 'y']
 
-def death(pidfile, log, server):
+def death(pidfile, log, server, handlers=None):
     if pidfile != None:
         os.unlink(pidfile)
     server.cleanup()
+    if handlers:
+        for h in handlers.values():
+            h.shutdown()
     exit(0)
 
 def serve(log, config, handlers):
@@ -64,7 +67,7 @@ def serve(log, config, handlers):
         exit(1)
 
     # Setup the kill signal
-    signal.signal(signal.SIGINT, (lambda signum, frame: death(pidfile, log, server)))
+    signal.signal(signal.SIGINT, (lambda signum, frame: death(pidfile, log, server, handlers)))
 
     # Chroot directory if necessary
     chroot = config['Global'].get('chroot', None)
@@ -102,7 +105,7 @@ def serve(log, config, handlers):
     log.info('Using Hostname %s', host)
     while True:
         server.run()
-    death(pidfile, log, server)
+    death(pidfile, log, server, handlers)
 
 def daemonize(log, config, handlers):
     log.debug('Forking Daemon')
@@ -184,12 +187,12 @@ def run():
     logger.debug('Effective Log Level %d' % logger.getEffectiveLevel())
 
     # Setup additional handlers
-    handlers = []
+    handlers = {}
     for sec in config.sections():
         if sec.lower() != 'global' and toBool(config[sec].get('Enabled', 'False')):
             mod = __import__('mh.%s' % sec.lower(), fromlist=['Handler'])
-            handler = getattr(mod, 'Handler')(logger, config[sec])
-            handlers.append(handler)
+            handler = getattr(mod, 'Handler')(logger, config[sec], handlers)
+            handlers[sec.lower()] = handler
             logger.info('Using handler %s' % sec)
 
     # Perform the requested service
