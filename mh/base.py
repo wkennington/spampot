@@ -28,8 +28,8 @@ class Handler:
         if self._name in other._deps:
             if other._name in self._deps:
                 raise Exception('Circular Dependency')
-            return False
-        return True
+            return True
+        return False
 
     def startup(self, handlers):
         self.handlers = handlers

@@ -22,20 +22,19 @@ import os
 import datetime
 
 class Handler(mh.base.Handler):
-    _deps = {}
+    #_deps = {}
 
     def __init__(self, log, config):
         self.log = log
         self.config = config
-        try:
-            self.mdir = config.get('dir')
-            if os.path.isdir(self.mdir):
-                log.debug('STORE: Using mail directory %s' % self.mdir)
-            else:
-                log.error('STORE: Mail directory %s doesn\'t exist' % self.mdir)
-                exit(1)
-        except:
+        self.mdir = config.get('dir', None)
+        if self.mdir == None:
             log.error('STORE: No mail directory configured')
+            exit(1)
+        if os.path.isdir(self.mdir):
+            log.debug('STORE: Using mail directory %s' % self.mdir)
+        else:
+            log.error('STORE: Mail directory %s doesn\'t exist' % self.mdir)
             exit(1)
 
     def startup(self, handlers):
