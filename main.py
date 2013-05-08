@@ -54,9 +54,10 @@ def serve(log, config, handlers):
                 os.kill(pid, 0)
                 log.error('Pidfile already exists! Exiting')
                 exit(1)
-            except:
+            except OSError:
                 log.info('Cleaning stale pidfile %s' % pidfile)
                 os.unlink(pidfile)
+
         open(pidfile, 'w').write(str(os.getpid()))
         log.debug('Wrote pidfile %s' % pidfile)
 
