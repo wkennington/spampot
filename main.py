@@ -197,7 +197,7 @@ def run():
         handler.__name = h
         handlerl[h] = handler
         logger.debug('Loaded handler %s' % h)
-    handlers = collections.OrderedDict(sorted(d.items(), key=lambda t: t[1]))
+    handlers = collections.OrderedDict(sorted(handlerl.items(), key=lambda t: t[1]))
     for k,v in handlers.items():
         v.startup(handlers)
         logger.info('Starting handler %s' % k)
