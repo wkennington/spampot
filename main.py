@@ -17,6 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
+
+import collections
 import csmtp, pysmtp
 import os, sys
 import glob
@@ -195,7 +197,7 @@ def run():
         handler.__name = h
         handlerl[h] = handler
         logger.debug('Loaded handler %s' % h)
-    handlers = OrderedDict(sorted(d.items(), key=lambda t: t[1]))
+    handlers = collections.OrderedDict(sorted(d.items(), key=lambda t: t[1]))
     for k,v in handlers.items():
         v.startup(handlers)
         logger.info('Starting handler %s' % k)
