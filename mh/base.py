@@ -18,15 +18,15 @@
 """
 
 class Handler:
-    __deps = {}
+    _deps = {}
 
     def __init__(self, log, config):
         self.log = log
         self.config = config
 
     def __lt__(self, other):
-        if self.__name in other.__deps:
-            if other.__name in self.__deps:
+        if self._name in other._deps:
+            if other._name in self._deps:
                 raise Exception('Circular Dependency')
             return False
         return True

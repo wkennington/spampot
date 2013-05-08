@@ -22,7 +22,7 @@ import os
 import datetime
 
 class Handler(mh.base.Handler):
-    __deps = {}
+    _deps = {}
 
     def __init__(self, log, config):
         self.log = log

@@ -194,9 +194,18 @@ def run():
     for h in hset:
         mod = __import__('mh.%s' % h.lower(), fromlist=['Handler'])
         handler = getattr(mod, 'Handler')(logger, config[h])
-        handler.__name = h
+        handler._name = h
+        try:
+            handler._deps
+        except:
+            handler._deps = {}
         handlerl[h] = handler
         logger.debug('Loaded handler %s' % h)
+    for k,v in handlerl.items():
+        for d in v._deps:
+            if not d in handlerl:
+                logger.error('%s couldn\'t satisfy dependency %s' % (k, d))
+                exit(1)
     handlers = collections.OrderedDict(sorted(handlerl.items(), key=lambda t: t[1]))
     for k,v in handlers.items():
         v.startup(handlers)
