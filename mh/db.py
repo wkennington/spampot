@@ -1,5 +1,5 @@
 """
-    Spampot Probe Mail Handler
+    Spampot Database Storage
     Copyright (C) 2013 William A. Kennington III
 
     This program is free software: you can redistribute it and/or modify
@@ -17,17 +17,13 @@
 
 """
 
-import mh.base
-import os
-import subprocess
-
-class Handler(mh.base.Handler):
-    _deps = {'DB'}
+class Handler:
+    _deps = {}
 
     def __init__(self, log, config):
         self.log = log
         self.config = config
-        self.sendmail = config.get('sendmail', '/usr/lib/sendmail')
+        self.db = config.get('file', 'db.bdb')
 
     def startup(self, handlers):
         self.handlers = handlers
@@ -36,16 +32,4 @@ class Handler(mh.base.Handler):
         pass
 
     def handle(self, host, port, msg):
-        self.send(host, msg)
-
-    def send(self, host, msg):
-        cmd = [self.sendmail, '-f', msg.sender] + msg.to
-        read, write = os.pipe()
-        os.write(write, msg.data)
-        os.close(write)
-        ret = subprocess.call(cmd, shell=False, stdin=read)
-        os.close(read)
-        if ret == 0:
-            self.log.debug('PROBE: Sent mail from %s' % host)
-        else:
-            self.log.warning('PROBE: Failed to send smtp message %s' % host)
+        self.log.debug('DB: Default Handler Action')
