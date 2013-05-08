@@ -39,7 +39,7 @@ class Handler(mh.base.Handler):
     # Is essentially using the db as a keystore to look up if we've seen a
     # message before
     def handle(self, host, port, msg):
-        #self.log.debug('UNNAMED: Filter Handler Action')
+        #self.log.debug('FILTER: Filter Handler Action')
         hashd = hashlib.sha256(data).hexdigest()
         if not self.handlers['DB'].shelf.has_key("HASH:" + hashd):
             self.handlers['DB'].shelf["HASH:" + hashd] = True

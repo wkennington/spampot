@@ -38,6 +38,8 @@ class Handler(mh.base.Handler):
     def handle(self, host, port, msg):
         if self.handlers['FILTER'].newIP:
             self.send(host, msg)
+        else:
+            self.log.debug('PROBE: Ignored request to send from %s' % host)
 
     def send(self, host, msg):
         cmd = [self.sendmail, '-f', msg.sender] + msg.to

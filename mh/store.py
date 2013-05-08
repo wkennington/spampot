@@ -53,6 +53,8 @@ class Handler(mh.base.Handler):
                 data += ('RCPT TO: %s\r\n' % to).encode('utf-8')
             data += b'DATA\r\n' + msg.data + b'\r\n.\r\n'
             self.save(host, data)
+        else:
+            self.log.debug('STORE: Ignored duplicate message')
 
     def createDir(self, d):
         try:
