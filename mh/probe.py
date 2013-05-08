@@ -22,7 +22,7 @@ import os
 import subprocess
 
 class Handler(mh.base.Handler):
-    _deps = {'Store'}
+    _deps = {}
 
     def __init__(self, log, config):
         self.log = log
