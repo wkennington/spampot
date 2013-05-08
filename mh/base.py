@@ -25,8 +25,8 @@ class Handler:
         self.config = config
 
     def __lt__(self, other):
-        if __name in other.__deps:
-            if other.__name in __deps:
+        if self.__name in other.__deps:
+            if other.__name in self.__deps:
                 raise Exception('Circular Dependency')
             return False
         return True
