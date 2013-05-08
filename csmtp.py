@@ -123,7 +123,7 @@ class SMTPHandler(asynchat.async_chat):
         self.set_terminator('header')
         self.pushs('250 Mail accepted\r\n')
         self.msg.data, self.buff = self.buff, b''
-        for k,v in self.handlers:
+        for k,v in self.handlers.items():
             self.log.debug('SMTP: %s called handler %s' % (self.peeraddr, k))
             v.handle(self.peeraddr, self.peerport, self.msg)
         self.msg_count += 1

@@ -34,7 +34,7 @@ class SMTP(smtpd.SMTPServer):
         host, port = peer
         self.log.debug('PYSMTP: %s got message contents' % host)
         bdata = data.encode('utf-8')
-        for k,v in self.handlers:
+        for k,v in self.handlers.items():
             self.log.debug('PYSMTP: %s called handler %s' % (host, k))
             v.handle(host, port, mail.Msg(to, sender, bdata))
 
