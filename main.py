@@ -36,8 +36,9 @@ def death(pidfile, log, server, handlers=None):
         os.unlink(pidfile)
     server.cleanup()
     if handlers:
-        for h in handlers.values():
-            h.shutdown()
+        for k in reversed(handlers):
+            handlers[k].shutdown()
+            log.debug('Shutdown %s', k)
     exit(0)
 
 def serve(log, config, handlers):

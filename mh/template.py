@@ -1,5 +1,5 @@
 """
-    Spampot Database Storage
+    Spampot Handler Template
     Copyright (C) 2013 William A. Kennington III
 
     This program is free software: you can redistribute it and/or modify
@@ -17,15 +17,12 @@
 
 """
 
-import mh.base
-
-class Handler(mh.base.Handler):
+class Handler:
     _deps = {}
 
     def __init__(self, log, config):
         self.log = log
         self.config = config
-        self.db = config.get('file', 'db.bdb')
 
     def startup(self, handlers):
         self.handlers = handlers
@@ -34,4 +31,4 @@ class Handler(mh.base.Handler):
         pass
 
     def handle(self, host, port, msg):
-        self.log.debug('DB: Default Handler Action')
+        self.log.debug('UNNAMED: Default Handler Action')
