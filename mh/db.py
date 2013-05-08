@@ -18,7 +18,7 @@
 """
 
 import mh.base
-import selve
+import shelve
 
 class Handler(mh.base.Handler):
     _deps = {}
@@ -30,7 +30,7 @@ class Handler(mh.base.Handler):
 
     def startup(self, handlers):
         self.handlers = handlers
-        self.shelf = shelve.shelf(self.db, writeback=False)
+        self.shelf = shelve.open(self.db, writeback=False)
 
     def shutdown(self):
         self.shelf.close()
@@ -39,6 +39,6 @@ class Handler(mh.base.Handler):
         pass
 
     def __getitem__(self, idx):
-        return shelf[idx]
-    def __setitem(self, idx, val):
-        return shelf[idx] = val
+        return self.shelf.__getitem__(idx)
+    def __setitem__(self, idx, val):
+        return self.shelf.__setitem__(idx, val)
