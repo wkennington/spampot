@@ -39,6 +39,7 @@ def death(pidfile, log, server, handlers=None):
         for k in reversed(handlers):
             handlers[k].shutdown()
             log.debug('Shutdown %s', k)
+    log.info('Closing Cleanly')
     exit(0)
 
 def serve(log, config, handlers):
@@ -78,7 +79,9 @@ def serve(log, config, handlers):
         exit(1)
 
     # Setup the kill signal
-    signal.signal(signal.SIGINT, (lambda signum, frame: death(pidfile, log, server, handlers)))
+    diefun = (lambda signum, frame: death(pidfile, log, server, handlers))
+    signal.signal(signal.SIGINT, diefun)
+    signal.signal(signal.SIGTERM, diefun)
 
     # Chroot directory if necessary
     chroot = config['Global'].get('chroot', None)
