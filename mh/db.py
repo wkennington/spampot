@@ -18,6 +18,7 @@
 """
 
 import mh.base
+import selve
 
 class Handler(mh.base.Handler):
     _deps = {}
@@ -29,9 +30,15 @@ class Handler(mh.base.Handler):
 
     def startup(self, handlers):
         self.handlers = handlers
+        self.shelf = shelve.shelf(self.db, writeback=False)
 
     def shutdown(self):
-        pass
+        self.shelf.close()
 
     def handle(self, host, port, msg):
-        self.log.debug('DB: Default Handler Action')
+        pass
+
+    def __getitem__(self, idx):
+        return shelf[idx]
+    def __setitem(self, idx, val):
+        return shelf[idx] = val
