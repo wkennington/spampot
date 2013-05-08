@@ -44,7 +44,11 @@ class Handler(mh.base.Handler):
         pass
 
     def handle(self, host, port, msg):
-        self.save(host, msg)
+        data = ('MAIL FROM: %s\r\n' % msg.sender).encode('utf-8')
+        for to in msg.to:
+            data += ('RCPT TO: %s\r\n' % to).encode('utf-8')
+        data += b'DATA\r\n' + msg.data + b'\r\n.\r\n'
+        self.save(host, data)
 
     def createDir(self, d):
         try:
@@ -57,7 +61,7 @@ class Handler(mh.base.Handler):
             self.log.error('STORE: Failed to create mail directory %s', d)
             return False
 
-    def save(self, host, msg):
+    def save(self, host, data):
         now = datetime.datetime.now()
         adir = '%s/%s' % (self.mdir, host)
         ddir = '%s/%s' % (adir, now.strftime('%m-%d-%y'))
@@ -67,7 +71,7 @@ class Handler(mh.base.Handler):
         try:
             fname = '%s/%s' % (ddir, now.strftime('%H:%M:%S.%f'))
             f = open(fname, 'wb')
-            f.write(msg.data)
+            f.write(data)
             f.close()
             self.log.debug('STORE: Saved message from %s to %s' % (host, fname))
         except:
