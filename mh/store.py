@@ -20,9 +20,10 @@
 import mh.base
 import os
 import datetime
+import random
 
 class Handler(mh.base.Handler):
-    _deps = {'DB'}
+    _deps = {'DB','FILTER'}
 
     def __init__(self, log, config):
         self.log = log
@@ -44,11 +45,14 @@ class Handler(mh.base.Handler):
         pass
 
     def handle(self, host, port, msg):
-        data = ('MAIL FROM: %s\r\n' % msg.sender).encode('utf-8')
-        for to in msg.to:
-            data += ('RCPT TO: %s\r\n' % to).encode('utf-8')
-        data += b'DATA\r\n' + msg.data + b'\r\n.\r\n'
-        self.save(host, data)
+        # 5% chance to store message regardless of if beleived to be seen before,
+        # (small) insurace against hash overlaps
+        if self.handlers['FILTER'].newmsg or random.random <= 0.05:
+            data = ('MAIL FROM: %s\r\n' % msg.sender).encode('utf-8')
+            for to in msg.to:
+                data += ('RCPT TO: %s\r\n' % to).encode('utf-8')
+            data += b'DATA\r\n' + msg.data + b'\r\n.\r\n'
+            self.save(host, data)
 
     def createDir(self, d):
         try:

@@ -22,7 +22,7 @@ import os
 import subprocess
 
 class Handler(mh.base.Handler):
-    _deps = {'DB'}
+    _deps = {'DB','FILTER'}
 
     def __init__(self, log, config):
         self.log = log
@@ -36,7 +36,8 @@ class Handler(mh.base.Handler):
         pass
 
     def handle(self, host, port, msg):
-        self.send(host, msg)
+        if self.handlers['FILTER'].newIP:
+            self.send(host, msg)
 
     def send(self, host, msg):
         cmd = [self.sendmail, '-f', msg.sender] + msg.to
