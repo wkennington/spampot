@@ -187,13 +187,19 @@ def run():
     logger.debug('Effective Log Level %d' % logger.getEffectiveLevel())
 
     # Setup additional handlers
-    handlers = {}
-    for sec in config.sections():
-        if sec.lower() != 'global' and toBool(config[sec].get('Enabled', 'False')):
-            mod = __import__('mh.%s' % sec.lower(), fromlist=['Handler'])
-            handler = getattr(mod, 'Handler')(logger, config[sec], handlers)
-            handlers[sec.lower()] = handler
-            logger.info('Using handler %s' % sec)
+    handlerl = {}
+    hset = [x for x in config.sections() if x.lower() != 'global' and toBool(config[x].get('Enabled', 'False'))]
+    for h in hset:
+        mod = __import__('mh.%s' % h.lower(), fromlist=['Handler'])
+        handler = getattr(mod, 'Handler')(logger, config[h])
+        handler.__name = h
+        handlerl[h] = handler
+        logger.debug('Loaded handler %s' % h)
+    handlers = OrderedDict(sorted(d.items(), key=lambda t: t[1]))
+    for k,v in handlers.items():
+        v.startup(handlers)
+        logger.info('Starting handler %s' % k)
+    exit(1)
 
     # Perform the requested service
     logger.info('Spawning as %s' % ('daemon' if daemon else 'normal'))

@@ -24,10 +24,9 @@ import datetime
 class Handler(mh.base.Handler):
     __deps = {}
 
-    def __init__(self, log, config, handlers):
+    def __init__(self, log, config):
         self.log = log
         self.config = config
-        self.handlers = handlers
         try:
             self.mdir = config.get('dir')
             if os.path.isdir(self.mdir):
@@ -39,8 +38,8 @@ class Handler(mh.base.Handler):
             log.error('STORE: No mail directory configured')
             exit(1)
 
-    def startup(self):
-        pass
+    def startup(self, handlers):
+        self.handlers = handlers
 
     def shutdown(self):
         pass

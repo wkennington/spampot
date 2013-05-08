@@ -24,14 +24,13 @@ import subprocess
 class Handler(mh.base.Handler):
     __deps = {}
 
-    def __init__(self, log, config, handlers):
+    def __init__(self, log, config):
         self.log = log
         self.config = config
         self.sendmail = config.get('sendmail', '/usr/lib/sendmail')
-        self.handlers = handlers
 
-    def startup(self):
-        pass
+    def startup(self, handlers):
+        self.handlers = handlers
 
     def shutdown(self):
         pass

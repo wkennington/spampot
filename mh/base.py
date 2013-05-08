@@ -20,10 +20,9 @@
 class Handler:
     __deps = {}
 
-    def __init__(self, log, config, handlers):
+    def __init__(self, log, config):
         self.log = log
         self.config = config
-        self.handlers = handlers
 
     def __lt__(self, other):
         if __name in other.__deps:
@@ -32,8 +31,8 @@ class Handler:
             return False
         return True
 
-    def startup(self):
-        pass
+    def startup(self, handlers):
+        self.handlers = handlers
 
     def shutdown(self):
         pass
