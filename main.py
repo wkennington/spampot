@@ -145,6 +145,9 @@ def normal(log, config, handlers):
     serve(log, config, handlers)
 
 def run():
+    # Change into the script directory
+    os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description='Spawn the spampot server')
     parser.add_argument('--conf', '-c', dest='conf', metavar='c', type=str, default='spampot.conf', help='Configuration file to read')
