@@ -17,12 +17,12 @@
 
 """
 
+import mh.base
 import os
 import datetime
 
-class Handler:
-    __name = 'Store'
-    __deps = []
+class Handler(mh.base.Handler):
+    __deps = {}
 
     def __init__(self, log, config, handlers):
         self.log = log

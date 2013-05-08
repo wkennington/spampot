@@ -18,13 +18,19 @@
 """
 
 class Handler:
-    __name = 'Unnamed'
-    __deps = []
+    __deps = {}
 
     def __init__(self, log, config, handlers):
         self.log = log
         self.config = config
         self.handlers = handlers
+
+    def __lt__(self, other):
+        if __name in other.__deps:
+            if other.__name in __deps:
+                raise Exception('Circular Dependency')
+            return False
+        return True
 
     def startup(self):
         pass

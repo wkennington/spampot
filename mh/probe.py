@@ -17,12 +17,12 @@
 
 """
 
+import mh.base
 import os
 import subprocess
 
-class Handler:
-    __name = 'Probe'
-    __deps = []
+class Handler(mh.base.Handler):
+    __deps = {}
 
     def __init__(self, log, config, handlers):
         self.log = log
