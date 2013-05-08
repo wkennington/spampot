@@ -210,7 +210,6 @@ def run():
     for k,v in handlers.items():
         v.startup(handlers)
         logger.info('Starting handler %s' % k)
-    exit(1)
 
     # Perform the requested service
     logger.info('Spawning as %s' % ('daemon' if daemon else 'normal'))
