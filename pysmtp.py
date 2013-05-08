@@ -34,9 +34,9 @@ class SMTP(smtpd.SMTPServer):
         host, port = peer
         self.log.debug('PYSMTP: %s got message contents' % host)
         bdata = data.encode('utf-8')
-        for handler in self.handlers:
-            self.log.debug('PYSMTP: %s called handler %s' % (host, handler._name))
-            handler.handle(host, port, mail.Msg(to, sender, bdata))
+        for k,v in self.handlers:
+            self.log.debug('PYSMTP: %s called handler %s' % (host, k))
+            v.handle(host, port, mail.Msg(to, sender, bdata))
 
     def cleanup(self):
         self.close()

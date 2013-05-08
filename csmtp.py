@@ -123,9 +123,9 @@ class SMTPHandler(asynchat.async_chat):
         self.set_terminator('header')
         self.pushs('250 Mail accepted\r\n')
         self.msg.data, self.buff = self.buff, b''
-        for handler in self.handlers:
-            self.log.debug('SMTP: %s called handler %s' % (self.peeraddr, handler._name))
-            handler.handle(self.peeraddr, self.peerport, self.msg)
+        for k,v in self.handlers:
+            self.log.debug('SMTP: %s called handler %s' % (self.peeraddr, k))
+            v.handle(self.peeraddr, self.peerport, self.msg)
         self.msg_count += 1
         self.reset()
         self.log.debug('SMTP: %s processed data' % self.peeraddr)
