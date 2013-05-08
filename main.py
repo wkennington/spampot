@@ -47,9 +47,16 @@ def serve(log, config, handlers):
     # Setup operations based on the pidfile
     pidfile = config['Global'].get('pidfile', None)
     if pidfile != None:
-        if os.path.isfile(pidfile):
-            log.error('Pidfile already exists! Exiting')
-            exit(1)
+        if os.path.exists(pidfile):
+            try:
+                with open(pidfile, 'r') as f:
+                    pid = int(f.read())
+                os.kill(pid, 0)
+                log.error('Pidfile already exists! Exiting')
+                exit(1)
+            except:
+                log.info('Cleaning stale pidfile %s' % pidfile)
+                os.unlink(pidfile)
         open(pidfile, 'w').write(str(os.getpid()))
         log.debug('Wrote pidfile %s' % pidfile)
 
