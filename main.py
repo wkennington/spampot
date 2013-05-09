@@ -42,7 +42,7 @@ def death(pidfile, log, server, handlers=None):
     log.info('Closing Cleanly')
     exit(0)
 
-def serve(log, config, handlers):
+def serve(log, config):
     log.debug('Opening Server')
 
     # Setup operations based on the pidfile
@@ -74,7 +74,7 @@ def serve(log, config, handlers):
         else:
             log.info('Using built-in SMTP Server')
             obj = pysmtp.SMTP
-        server = obj(log, host=host, port=port, addr=addr, handlers=handlers)
+        server = obj(log, host=host, port=port, addr=addr)
     except:
         log.error('Failed to bind server to socket %s:%d' % (host, port))
         exit(1)
@@ -115,14 +115,37 @@ def serve(log, config, handlers):
         log.error('Cannot Drop User / Group Privileges. Probably not running as root?')
         exit(1)
 
+    # Setup additional handlers
+    handlerl = {}
+    hset = [x for x in config.sections() if x.lower() != 'global' and toBool(config[x].get('Enabled', 'False'))]
+    for h in hset:
+        mod = __import__('mh.%s' % h.lower(), fromlist=['Handler'])
+        handler = getattr(mod, 'Handler')(log, config[h])
+        handler._name = h
+        try:
+            handler._deps
+        except:
+            handler._deps = {}
+        handlerl[h] = handler
+        log.debug('Loaded handler %s' % h)
+    for k,v in handlerl.items():
+        for d in v._deps:
+            if not d in handlerl:
+                log.error('%s couldn\'t satisfy dependency %s' % (k, d))
+                exit(1)
+    handlers = collections.OrderedDict(sorted(handlerl.items(), key=lambda t: t[1]))
+    for k,v in handlers.items():
+        v.startup(handlers)
+        log.info('Starting handler %s' % k)
+
     # Run the server
     log.info('Accepting Connections on %s:%d', addr, port)
     log.info('Using Hostname %s', host)
     while True:
-        server.run()
+        server.run(handlers=handlers)
     death(pidfile, log, server, handlers)
 
-def daemonize(log, config, handlers):
+def daemonize(log, config):
     log.debug('Forking Daemon')
 
     # Perform the first fork
@@ -136,7 +159,6 @@ def daemonize(log, config, handlers):
         exit(1)
 
     # Decouple from parent environment
-    os.chdir("/") 
     os.setsid() 
     os.umask(0)
 
@@ -151,10 +173,10 @@ def daemonize(log, config, handlers):
         exit(1) 
 
     # Begin Execution
-    serve(log, config, handlers)
+    serve(log, config)
 
-def normal(log, config, handlers):
-    serve(log, config, handlers)
+def normal(log, config):
+    serve(log, config)
 
 def run():
     # Change into the script directory
@@ -198,7 +220,9 @@ def run():
         logs = ['syslog']
     for log in logs:
         if log == 'syslog':
-            logger.addHandler(logging.handlers.SysLogHandler())
+            handler = logging.handlers.SysLogHandler(address='/dev/log', facility=logging.handlers.SysLogHandler.LOG_DAEMON)
+            handler.setFormatter(logging.Formatter(fmt='spampot: %(message)s'))
+            logger.addHandler(handler)
         elif log == '-' and not daemon:
             logger.addHandler(logging.StreamHandler(sys.stdout))
         else:
@@ -208,32 +232,10 @@ def run():
     logger.warning('Using Log Level %s' % log_level)
     logger.debug('Effective Log Level %d' % logger.getEffectiveLevel())
 
-    # Setup additional handlers
-    handlerl = {}
-    hset = [x for x in config.sections() if x.lower() != 'global' and toBool(config[x].get('Enabled', 'False'))]
-    for h in hset:
-        mod = __import__('mh.%s' % h.lower(), fromlist=['Handler'])
-        handler = getattr(mod, 'Handler')(logger, config[h])
-        handler._name = h
-        try:
-            handler._deps
-        except:
-            handler._deps = {}
-        handlerl[h] = handler
-        logger.debug('Loaded handler %s' % h)
-    for k,v in handlerl.items():
-        for d in v._deps:
-            if not d in handlerl:
-                logger.error('%s couldn\'t satisfy dependency %s' % (k, d))
-                exit(1)
-    handlers = collections.OrderedDict(sorted(handlerl.items(), key=lambda t: t[1]))
-    for k,v in handlers.items():
-        v.startup(handlers)
-        logger.info('Starting handler %s' % k)
 
     # Perform the requested service
     logger.info('Spawning as %s' % ('daemon' if daemon else 'normal'))
-    daemonize(logger, config, handlers) if daemon else normal(logger, config, handlers)
+    daemonize(logger, config) if daemon else normal(logger, config)
 
     exit(0)
 

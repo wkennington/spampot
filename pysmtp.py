@@ -22,12 +22,12 @@ import smtpd
 import mail
 
 class SMTP(smtpd.SMTPServer):
-    def __init__(self, log, addr='0.0.0.0', port=25, host='localhost', handlers=[]):
+    def __init__(self, log, addr='0.0.0.0', port=25, host='localhost'):
         smtpd.SMTPServer.__init__(self, (addr, port), None)
         self.log = log
-        self.handlers = handlers
 
-    def run(self):
+    def run(self, handlers=[]):
+        self.handlers = handlers
         asyncore.loop()
 
     def process_message(self, peer, sender, to, data):
