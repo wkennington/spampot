@@ -26,7 +26,7 @@ class Handler(mh.base.Handler):
     def __init__(self, log, config):
         self.log = log
         self.config = config
-        self.db = config.get('file', 'db.bdb')
+        self.db = config.get('file', 'db')
 
     def startup(self, handlers):
         self.handlers = handlers
