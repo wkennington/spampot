@@ -32,8 +32,6 @@ def toBool(s):
     return s.lower() in ['true', 't', '1', 'yes', 'y']
 
 def death(pidfile, log, server, handlers=None):
-    if pidfile != None:
-        os.unlink(pidfile)
     server.cleanup()
     if handlers:
         for k in reversed(handlers):
