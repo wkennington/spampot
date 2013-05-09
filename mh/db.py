@@ -30,7 +30,11 @@ class Handler(mh.base.Handler):
 
     def startup(self, handlers):
         self.handlers = handlers
-        self.shelf = shelve.open(self.db, writeback=False)
+        try:
+            self.shelf = shelve.open(self.db, writeback=False)
+        except Exception as e:
+            self.log.error('DB %s: %s' % (self.db, e))
+            exit(1)
 
     def shutdown(self):
         self.shelf.close()

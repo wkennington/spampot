@@ -21,7 +21,7 @@ import mh.base
 import hashlib
 
 class Handler(mh.base.Handler):
-    _deps = {'DB'}
+    _deps = {'db'}
 
     def __init__(self, log, config):
         self.log = log
@@ -30,8 +30,6 @@ class Handler(mh.base.Handler):
 
     def startup(self, handlers):
         self.handlers = handlers
-        self.newmsg = False
-        self.newIP = False
 
     def shutdown(self):
         pass
@@ -39,16 +37,22 @@ class Handler(mh.base.Handler):
     # Is essentially using the db as a keystore to look up if we've seen a
     # message before
     def handle(self, host, port, msg):
-        #self.log.debug('FILTER: Filter Handler Action')
-        hashd = hashlib.sha256(data).hexdigest()
-        if not self.handlers['DB'].shelf.has_key("HASH:" + hashd):
-            self.handlers['DB'].shelf["HASH:" + hashd] = True
+        self.newmsg = False
+        self.newIP = False
+
+        # Check message hash to see if it is unique
+        hashd = 'HASH:%s' % hashlib.sha256(msg.data).hexdigest()
+        if not hashd in self.handlers['db'].shelf:
+            self.handlers['db'].shelf[hashd] = True
             self.newmsg = True
-        if self.handlers['DB'].shelf.has_key("IP:" + host):
-            ipcnt = self.handlers['DB'].shelf["IP:" + host]
+
+        # Check how many times we've seen this client IP
+        ip = 'IP:%s' % host
+        if ip in self.handlers['db'].shelf:
+            ipcnt = self.handlers['db'].shelf[ip]
             if ipcnt <= self.forwardCount:
                 self.newIP = True
-            self.handlers['DB'].shelf["IP:" + host] = ipcnt + 1
+            self.handlers['db'].shelf[ip] = ipcnt + 1
         else:
-            self.handlers['DB'].shelf["IP:" + host] = 1
+            self.handlers['db'].shelf[ip] = 1
             self.newIP = True

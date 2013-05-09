@@ -23,7 +23,7 @@ import datetime
 import random
 
 class Handler(mh.base.Handler):
-    _deps = {'DB','FILTER'}
+    _deps = {'db', 'filter'}
 
     def __init__(self, log, config):
         self.log = log
@@ -45,9 +45,7 @@ class Handler(mh.base.Handler):
         pass
 
     def handle(self, host, port, msg):
-        # 5% chance to store message regardless of if beleived to be seen before,
-        # (small) insurace against hash overlaps
-        if self.handlers['FILTER'].newmsg or random.random <= 0.05:
+        if self.handlers['filter'].newmsg:
             data = ('MAIL FROM: %s\r\n' % msg.sender).encode('utf-8')
             for to in msg.to:
                 data += ('RCPT TO: %s\r\n' % to).encode('utf-8')

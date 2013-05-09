@@ -22,7 +22,7 @@ import os
 import subprocess
 
 class Handler(mh.base.Handler):
-    _deps = {'DB','FILTER'}
+    _deps = {'db', 'filter'}
 
     def __init__(self, log, config):
         self.log = log
@@ -36,7 +36,7 @@ class Handler(mh.base.Handler):
         pass
 
     def handle(self, host, port, msg):
-        if self.handlers['FILTER'].newIP:
+        if self.handlers['filter'].newIP:
             self.send(host, msg)
         else:
             self.log.debug('PROBE: Ignored request to send from %s' % host)
