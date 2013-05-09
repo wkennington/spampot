@@ -182,8 +182,8 @@ def run():
         if config_dir != None:
             for conf in glob.glob('%s/*.conf' % config_dir):
                 config.read(conf)
-    except configparser.ParsingError:
-        print('Failed to parse configuration', file=sys.stderr)
+    except configparser.ParsingError as e:
+        print('%s' % e, file=sys.stderr)
         exit(1)
 
     # Merge config with command line arguments
