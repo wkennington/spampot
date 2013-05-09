@@ -169,18 +169,22 @@ def run():
     parser.add_argument('--log', '-l', dest='logs', metavar='file', type=str, default=None, nargs='+', help='The logfile[s] to write into')
     args = parser.parse_args()
 
-    # Read the default configuration file
-    config = configparser.ConfigParser()
-    config.read(args.conf)
-    if not ('Global' in config.sections()):
-        print('Configuration file is missing the "Global" section')
-        exit(1)
+    try:
+        # Read the default configuration file
+        config = configparser.ConfigParser()
+        config.read(args.conf)
+        if not ('Global' in config.sections()):
+            print('Configuration file is missing the "Global" section')
+            exit(1)
 
-    # Read additional configuration files
-    config_dir = config['Global'].get('config_dir', None)
-    if config_dir != None:
-        for conf in glob.glob('%s/*.conf' % config_dir):
-            config.read(conf)
+        # Read additional configuration files
+        config_dir = config['Global'].get('config_dir', None)
+        if config_dir != None:
+            for conf in glob.glob('%s/*.conf' % config_dir):
+                config.read(conf)
+    except configparser.ParsingError:
+        print('Failed to parse configuration', file=sys.stderr)
+        exit(1)
 
     # Merge config with command line arguments
     logs = args.logs if args.logs else config['Global'].get('log', 'syslog').split(' ')
