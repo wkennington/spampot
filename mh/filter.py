@@ -1,5 +1,5 @@
 """
-    Spampot Base Handler Template
+    Spampot Message Filter Handler
     Copyright (C) 2013 William A. Kennington III
 
     This program is free software: you can redistribute it and/or modify
